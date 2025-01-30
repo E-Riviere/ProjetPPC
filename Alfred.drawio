@@ -102,7 +102,7 @@
           <mxGeometry x="675" y="410" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="1TrffUojrhhDqjE15Ray-95" value="Incertitude" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="430" y="180" width="120" height="80" as="geometry" />
+          <mxGeometry x="414" y="190" width="120" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
