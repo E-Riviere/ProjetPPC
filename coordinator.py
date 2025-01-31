@@ -20,7 +20,7 @@ if __name__ == "__main__":
                     print("Connected by", addr)
                     for i in range(10):
                         if i % 2 == 0:
-                            data = [["R","R","G","G"],[],["Car1","Car2"],["Car3"],[],"No action"]
+                            data = [["R","R","G","G"],[],["Car1","Car2"],["Car3"],[],"An action"]
                         else:
                             data = [["G","G","R","R"],["Car1","Car2"],["Car3"],[],[],"No action"]
                         data = str(data)

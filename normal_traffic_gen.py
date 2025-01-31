@@ -11,7 +11,7 @@ east = sysv_ipc.MessageQueue(first_key + 3, sysv_ipc.IPC_CREAT)
 def gen_traffic():
     voiture = ""
     i = 0
-    while i < 10:
+    while i < 1000:
         try:
             direction = ["North", "South", "West", "East"]
             source = random.choice(direction)
@@ -21,24 +21,20 @@ def gen_traffic():
             print(source+ ',' + message)
             message = message.encode()
             if source == "North":
-                north.send(message)
+                north.send(message, type=1)
             elif source == "South":
-                south.send(message)
+                south.send(message, type=1)
             elif source == "West":
-                west.send(message)
+                west.send(message, type=1)
             else:
-                east.send(message)
+                east.send(message, type=1)
 
             i += 1
         
         except Exception as e:
             print(e)
     print(i)
-    time.sleep(10)
-    north.remove()
-    south.remove()
-    west.remove()
-    east.remove()
+    
 
 
 
