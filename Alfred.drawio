@@ -109,7 +109,7 @@
         </mxCell>
         <UserObject label="https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager" link="https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager" id="ag0SSJsxfCpycolzhZt8-22">
           <mxCell style="text;whiteSpace=wrap;" vertex="1" parent="1">
-            <mxGeometry x="500" y="480" width="490" height="40" as="geometry" />
+            <mxGeometry x="500" y="460" width="490" height="40" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="https://www.geeksforgeeks.org/python-os-mkfifo-method/" link="https://www.geeksforgeeks.org/python-os-mkfifo-method/" id="ag0SSJsxfCpycolzhZt8-23">
