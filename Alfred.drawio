@@ -119,7 +119,7 @@
         </UserObject>
         <UserObject label="https://www.geeksforgeeks.org/python-os-mkfifo-method/" link="https://www.geeksforgeeks.org/python-os-mkfifo-method/" id="ag0SSJsxfCpycolzhZt8-23">
           <mxCell style="text;whiteSpace=wrap;" parent="1" vertex="1">
-            <mxGeometry x="110" y="340" width="360" height="40" as="geometry" />
+            <mxGeometry x="10" y="340" width="360" height="40" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="ag0SSJsxfCpycolzhZt8-24" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
@@ -145,6 +145,21 @@
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="480" y="790" as="sourcePoint" />
             <mxPoint x="510" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_gkanVlYRUp2pJVoBDpG-4" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.407;entryY=0.033;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="1TrffUojrhhDqjE15Ray-68">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="789.4972164181268" y="39.99965520589841" as="sourcePoint" />
+            <mxPoint x="400" y="424.86" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="789" y="210" />
+              <mxPoint x="410" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_gkanVlYRUp2pJVoBDpG-5" value="SIGUSR2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="_gkanVlYRUp2pJVoBDpG-4">
+          <mxGeometry x="-0.1908" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
       </root>
