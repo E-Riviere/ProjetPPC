@@ -10,13 +10,16 @@ north = sysv_ipc.MessageQueue(first_key, sysv_ipc.IPC_CREAT)
 south = sysv_ipc.MessageQueue(first_key + 1, sysv_ipc.IPC_CREAT)
 west = sysv_ipc.MessageQueue(first_key + 2, sysv_ipc.IPC_CREAT)
 east = sysv_ipc.MessageQueue(first_key + 3, sysv_ipc.IPC_CREAT)
-
+def del_pipe(path):
+    os.remove(path)
+    raise KeyboardInterrupt()
 def gen_prio_traffic():
     voiture = ""
     i = 0
     pipe_path = "priority_trafic_pipe"
     os.mkfifo(pipe_path)
     data_process=shared_memory_process.shared_memory_manager('priority_traffic_gen')
+    signal.signal(signal.SIGINT, lambda a, b: del_pipe(pipe_path))
     light_pid=int([i for i in data_process if i[0]=='light'][0][1])
     while i < 1000:
         #try:

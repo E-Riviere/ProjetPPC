@@ -6,7 +6,7 @@ from multiprocessing import resource_tracker
 import signal
 
 def shared_memory_manager(name):
-    remove_shm_from_resource_tracker()
+    #remove_shm_from_resource_tracker()
     a = np.array([name.encode(), str(os.getpid()).encode()], dtype="S30")
     nb_process = 3
     shm_name = "crossroad"
