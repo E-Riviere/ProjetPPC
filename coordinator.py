@@ -1,16 +1,22 @@
 import socket
+import signal
+import os
+import time
+def sig_usr1_handler(pid):
+    time.sleep(2)
+    os.kill(pid, signal.SIGUSR2)
 
-
-
-
-
-
+import shared_memory_process
 HOST = "localhost"
 PORT = 8080
 
 
 if __name__ == "__main__":
     try:
+        
+        data_process=shared_memory_process.shared_memory_manager('coordinator')
+        light_pid=int([i for i in data_process if i[0]=='light'][0][1])
+        signal.signal(signal.SIGUSR1, lambda a, b: sig_usr1_handler(light_pid))
         conn = None
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((HOST, PORT))
