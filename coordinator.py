@@ -36,10 +36,11 @@ class Coordinator:
 
     def receive_normal_queue(self,queue):
         try:
-            self.message, t = queue.receive(type=1,block=False)
-            self.message = self.message.decode()
+            message, t = queue.receive(type=1,block=False)
+            message = message.decode()
         except sysv_ipc.BusyError:
-            self.message = None
+            message = None
+        return message
     
     def receive_priority_queue(self,queue):
         self.message = None
@@ -52,41 +53,43 @@ class Coordinator:
         return self.message
 
     def mainLoop(self):
+        self.data = [["R","R","R","R"],"","","","",""]
         while True:
-            
-            self.data = [["R","R","R","R"],"","","","","No action"]
+            light_changed = False
+            old_light = self.data[0]
+
             try:
-                if self.existing_shm.buf[0] == 0b0110:
+                if self.existing_shm.buf:
+                    if self.existing_shm.buf[0] == 0b0110:
+                        
+                        self.voiture1 = self.receive_normal_queue(self.west)
+                        self.voiture2 = self.receive_normal_queue(self.east)
+                        self.data = [["R","V","V","R"],"",self.voiture1,self.voiture2,"","No action"]
+                        light_changed = old_light != self.data[0]
                     
-                    self.voiture1 = self.receive_normal_queue(self.west)
-                    self.voiture2 = self.receive_normal_queue(self.east)
-                    self.data = [["R","V","V","R"],"",self.voiture1,self.voiture2,"","No action"]
-                
-                elif self.existing_shm.buf[0] == 0b1001:
-
-                    self.voiture1 = self.receive_normal_queue(self.north)
-                    self.voiture2 = self.receive_normal_queue(self.south)
-                    self.data = [["V","R","R","V"],self.voiture1,"","",self.voiture2,"No action"]
-
-
-                else:
-                    self.data = [["R","R","R","R"],"","","","","No action"]
+                    elif self.existing_shm.buf[0] == 0b1001:
+                        light_changed = old_light == self.data[0]
+                        self.voiture1 = self.receive_normal_queue(self.north)
+                        self.voiture2 = self.receive_normal_queue(self.south)
+                        self.data = [["V","R","R","V"],self.voiture1,"","",self.voiture2,"No action"]
+                        light_changed = old_light != self.data[0]
                 
                 if self.conn == None:
                     self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.conn, addr = self.server_socket.accept()
                     print(f"Connection from {addr}")
                 else:
-                    if self.voiture1 != None or self.voiture2 != None:
+                    if self.voiture1 != None or self.voiture2 != None or light_changed and self.data:
                         print(self.data)
+
                         self.data[5] = "Normal traffic"
-                        self.data = str(self.data)
+                        self.strdata = str(self.data)
                         try:
-                            self.conn.send(self.data.encode())
+                            self.conn.send(self.strdata.encode())
                         except Exception as e:
                             print("Error", e)
                             pass
-                        time.sleep(random.randint(1,2))
+
 
                     try:
                         data_recv = self.conn.recv(1024,socket.MSG_DONTWAIT)
@@ -160,9 +163,9 @@ def sig_usr1_handler(pid,shm):
         if message != None:
             coord.data[5] = "Priority vehicule from" + source
             if coord.conn != None:
-                coord.data = str(coord.data)
+                coord.strdata = str(coord.data)
                 try:
-                    coord.conn.send(coord.data.encode())
+                    coord.conn.send(coord.strdata.encode())
                 except Exception as e:
                     print("Error", e)
                     pass

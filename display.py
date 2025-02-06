@@ -63,18 +63,21 @@ def display_crossroads(stdscr):
                 data = data.decode()
                 try:
                     data = eval(data)
-                except ValueError:
-                    stdscr(16,0,str(data))
+                except TypeError:
+                    data = eval(data)[-1]
+                    break
                 i = 0
+
+
                 for k,v in light_states.items():
                     if light_states[k] != data[0][i] or vehicles[k] != data[i+1]:
                         changed = True
                         
                         break   
                 light_states["North"] = data[0][0]
-                light_states["South"] = data[0][1]
-                light_states["West"] = data[0][2]
-                light_states["East"] = data[0][3]
+                light_states["West"] = data[0][1]
+                light_states["East"] = data[0][2]
+                light_states["South"] = data[0][3]
                 vehicles["North"] = data[1]
                 vehicles["West"] = data[2]
                 vehicles["East"] = data[3]
