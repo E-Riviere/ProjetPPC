@@ -36,7 +36,10 @@ class TraficLight:
     def vehicule_prio_handler(self,a,b):
         self.timerSwitch=False
         with open(self.name_pipe_path, "r") as pipe:
-            self.light=int(pipe.read())
+            temp = pipe.read()
+            while temp == '':
+                temp = pipe.read()
+            self.light=int(temp)
             self.shm.buf[0] = self.light
             os.kill(self.pid_coord, signal.SIGUSR1)
             
@@ -48,7 +51,6 @@ class TraficLight:
         self.timer_light(None, None)
     def del_shared_memory(self,a,b):
         self.shm.close()
-        self.shm.unlink()
         raise KeyboardInterrupt()
     
 
