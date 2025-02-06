@@ -24,7 +24,7 @@ def gen_prio_traffic():
     while i < 1000:
         #try:
             time.sleep(random.randint(1, 10))
-            direction = ["North", "West", "East", "South"]
+            direction = ["South", "East", "West", "North"]
             n_source=random.randint(0, 3)
             source = direction[n_source]
             direction.remove(source)
@@ -47,6 +47,7 @@ def gen_prio_traffic():
             print(light_pid)
             os.kill(light_pid, signal.SIGUSR1)
             with open(pipe_path, "w") as pipe:
+                print(2**n_source, source)
                 pipe.write(str(2**n_source))
             
         

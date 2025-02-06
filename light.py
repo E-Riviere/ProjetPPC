@@ -27,22 +27,22 @@ class TraficLight:
         self.shm.buf[0] = self.light
         os.kill(self.pid_coord, signal.SIGUSR1)
     def timer_light(self,a, b):
+
         if self.timerSwitch:
             self.switch_light()
-            print(bin(self.light))
             signal.alarm(5)
+        
+
     def vehicule_prio_handler(self,a,b):
         self.timerSwitch=False
         with open(self.name_pipe_path, "r") as pipe:
             self.light=int(pipe.read())
             self.shm.buf[0] = self.light
-            print("Pinpon")
-            print(bin(self.light))
             os.kill(self.pid_coord, signal.SIGUSR1)
             
         
     def normal_behavior_handler(self, a,b):
-        print("reset normal")
+
         self.light = 0b0110 if self.light & 0b0110 == 0 else 0b1001
         self.timerSwitch = True
         self.timer_light(None, None)
@@ -54,12 +54,18 @@ class TraficLight:
 
 def trafic_light_gen():
     t=TraficLight()
+    return t
     
 
     
 if __name__ == "__main__":
-    trafic_light_gen()
+    trafic_light = trafic_light_gen()
     
-while True:
-    #Garder le programme en vie pour les changements de lumière avec Alarm
-    time.sleep(1)
+    while True:
+        #Garder le programme en vie pour les changements de lumière avec Alarm
+        try:
+            time.sleep(1)
+        except Exception as e:
+                print(e)
+                trafic_light.del_shared_memory(None, None)
+                exit()
