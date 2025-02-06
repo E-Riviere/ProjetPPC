@@ -13,7 +13,6 @@ PORT = 8080
 
 key = 128
 coord = None
-
 class Coordinator:
 
     def __init__(self):
@@ -62,45 +61,8 @@ class Coordinator:
                 self.message = None
         return self.message
 
-    def mainLoop(self):
+    def mainLoop(self,a):
         self.data = [["R","R","R","R"],"","","","",""]
-        if self.priority:
-            if self.existing_shm.buf[0] in [0b1000, 0b0100, 0b0010, 0b0001] and coord != None:
-                message = None
-                coord.data = [["R","R","R","R"],"","","","",""]
-                while message == None:
-                    source = None
-                    if self.existing_shm.buf[0] == 0b1000:
-                        message = coord.receive_priority_queue(coord.north)
-                        source = "North"
-                        coord.data[0] = ["V","R","R","R"]
-                        coord.data[1] = message
-                    elif self.existing_shm.buf[0] == 0b0100:
-                        message = coord.receive_priority_queue(coord.west)
-                        source = "West"
-                        coord.data[0] = ["R","V","R","R"]
-                        coord.data[2] = message
-                    elif self.existing_shm.buf[0] == 0b0010:
-                        message = coord.receive_priority_queue(coord.east)
-                        source = "East"
-                        coord.data[0] = ["R","R","V","R"]
-                        coord.data[3] = message
-                    elif self.existing_shm.buf[0] == 0b0001:
-                        message = coord.receive_priority_queue(coord.south)
-                        source = "South"
-                        coord.data[0] = ["R","R","R","V"]
-                        coord.data[4] = message
-
-                if message != None:
-                    coord.data[5] = "Priority vehicule from " + source
-                    if coord.conn != None:
-                        coord.strdata = str(coord.data)
-                        try:
-                            coord.conn.send(coord.strdata.encode())
-                        except Exception as e:
-                            pass
-                    time.sleep(random.randint(AVG_TIME_TO_PASS - AVG_TIME_TO_PASS // 5, AVG_TIME_TO_PASS + AVG_TIME_TO_PASS // 5))
-                    os.kill(self.light_pid, signal.SIGUSR2)
         self.light_changed = False
         while True:
             self.old_light = self.data[0]
@@ -156,7 +118,6 @@ class Coordinator:
                         self.conn, addr = self.server_socket.accept()
                     except OSError:
                         pass
-
                 else:
                     if (((self.voitureN != None or self.voitureS != None) and self.data[0] ==["V","R","R","V"]) or ((self.voitureW != None or self.voitureE != None) and self.data[0] ==["R","V","V","R"]) or self.light_changed):
                         self.data[5] = "Normal traffic"
@@ -178,21 +139,30 @@ class Coordinator:
                             self.conn = None
                     except:
                         pass
-
-                if self.voitureN or self.voitureW or self.voitureS or self.voitureE:
+                if (self.voitureN or self.voitureS) and self.data[0] ==["V","R","R","V"] or ((self.voitureW  or self.voitureE) and self.data[0] ==["R","V","V","R"]):
                     time.sleep(random.randint(AVG_TIME_TO_PASS - AVG_TIME_TO_PASS // 5, AVG_TIME_TO_PASS + AVG_TIME_TO_PASS // 5))
+                if self.voitureE is None and self.voitureN is None and self.voitureS is None and self.voitureW is None:
+                    try:
+                        message, t = self.north.receive(type=3, block=False)
+                        message = message.decode()
+                    except sysv_ipc.BusyError:
+                        message = None
+                    if message != None:
+                        os.kill(os.getpid(),signal.SIGINT)
+        
+                
+
             except TypeError:
                 pass
             
-            except Exception as e:
-                print(e)
-                self.clearMemory()
-                break
 
 
     def clearMemory(self):
-        self.existing_shm.close()
-        self.existing_shm.unlink()
+        try:
+            self.existing_shm.close()
+        except:
+            pass
+        print("shared memory unlinked")
         self.server_socket.close()
         if self.conn != None:
             self.conn.close()
@@ -208,27 +178,62 @@ class Coordinator:
 
 def sig_usr1_handler(pid, shm):
     coord.priority = True
-    try:
-        coord.mainLoop()
-    except Exception as e:
-        print(e) 
+    if coord.priority:
+        if coord.existing_shm.buf[0] in [0b1000, 0b0100, 0b0010, 0b0001] and coord != None:
+            message = None
+            coord.data = [["R","R","R","R"],"","","","",""]
+            while message == None:
+                source = None
+                if coord.existing_shm.buf[0] == 0b1000:
+                    message = coord.receive_priority_queue(coord.north)
+                    source = "North"
+                    coord.data[0] = ["V","R","R","R"]
+                    coord.data[1] = message
+                elif coord.existing_shm.buf[0] == 0b0100:
+                    message = coord.receive_priority_queue(coord.west)
+                    source = "West"
+                    coord.data[0] = ["R","V","R","R"]
+                    coord.data[2] = message
+                elif coord.existing_shm.buf[0] == 0b0010:
+                    message = coord.receive_priority_queue(coord.east)
+                    source = "East"
+                    coord.data[0] = ["R","R","V","R"]
+                    coord.data[3] = message
+                elif coord.existing_shm.buf[0] == 0b0001:
+                    message = coord.receive_priority_queue(coord.south)
+                    source = "South"
+                    coord.data[0] = ["R","R","R","V"]
+                    coord.data[4] = message
+
+            if message != None:
+                coord.data[5] = "Priority vehicule from " + source
+                if coord.conn != None:
+                    coord.strdata = str(coord.data)
+                    try:
+                        coord.conn.send(coord.strdata.encode())
+                    except Exception as e:
+                        pass
+                time.sleep(random.randint(AVG_TIME_TO_PASS - AVG_TIME_TO_PASS // 5, AVG_TIME_TO_PASS + AVG_TIME_TO_PASS // 5))
+                os.kill(coord.light_pid, signal.SIGUSR2)
+
 
 def sig_int_handler(a, b):
     time.sleep(1)
-    os.kill(coord.light_pid, signal.SIGINT)
-    print("killed")
-    coord.north.send("".encode(),type = 3)
+    
     coord.north.send("".encode(),type = 4)
     message, t = coord.north.receive(type=5)
+    coord.existing_shm.close()
     time.sleep(1)
     print("killed mq and gen")
-
+    coord.clearMemory()
+    os.kill(coord.light_pid, signal.SIGINT)
+    print("killed light")
     raise KeyboardInterrupt()
 
 if __name__ == "__main__":
     coord = Coordinator()
     try:
-        coord.mainLoop()
+        coord.mainLoop(0)
     except Exception as e:
         print(e) 
-    coord.clearMemory()
+    

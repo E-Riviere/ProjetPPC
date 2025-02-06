@@ -31,9 +31,9 @@ def gen_prio_traffic():
         source = direction[n_source]
         direction.remove(source)
         destination = direction[random.randint(0, 2)]
-        voiture = f"Car{i}"
+        voiture = f"PriorityCar{i}"
         message = f"{destination},{voiture}"
-        print(source+ ',' + message)
+        print(source + ',' + message)
         message = message.encode()
         if source == "North":
             north.send(message, type=2)

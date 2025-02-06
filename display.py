@@ -2,6 +2,8 @@ import curses
 import time
 import socket
 
+import shared_memory_process
+
 # Define the crossroads sections
 sections = ["North", "South", "West", "East"]
 
@@ -157,7 +159,8 @@ def display_crossroads(stdscr):
     
 
 def simulate(stdscr):
-    """Simulate the crossroads for a few cycles."""
+    shm = shared_memory_process.shared_memory_manager('display')
+    time.sleep(1)
     curses.curs_set(0)  
     stdscr.nodelay(1)  
 

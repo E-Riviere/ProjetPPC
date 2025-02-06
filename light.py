@@ -50,7 +50,9 @@ class TraficLight:
         self.timerSwitch = True
         self.timer_light(None, None)
     def del_shared_memory(self,a,b):
+        self.shm.unlink()
         self.shm.close()
+        print("memory closed")
         raise KeyboardInterrupt()
     
 

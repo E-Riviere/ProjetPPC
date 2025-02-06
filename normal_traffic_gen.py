@@ -9,12 +9,21 @@ west = sysv_ipc.MessageQueue(first_key + 2, sysv_ipc.IPC_CREAT)
 east = sysv_ipc.MessageQueue(first_key + 3, sysv_ipc.IPC_CREAT)
 
 def gen_traffic():
+    while True:
+        try:
+            nb_veh = int(input("Entrer le nombre de véhicule normal à générer (-1 to test priority) : "))
+            break
+        except ValueError:
+            print("Invalid input! Please enter a valid integer.")
     voiture = ""
     i = 0
-    north.send("East,CarSpecial".encode())
-    for j in range(10):
-        south.send(f"North,CarSpecial{i}".encode())
-    """ while i < 100:
+    
+    if nb_veh == -1:
+        north.send("East,BlockedCar1".encode())
+        north.send("East,BlockedCar2".encode())
+        for j in range(10):
+            south.send(f"North,BlockingCar{j}".encode())
+    while i < nb_veh:
         try:
             direction = ["South", "East", "West", "North"]
             source = direction[random.randint(0, 3)]
@@ -36,7 +45,9 @@ def gen_traffic():
             i += 1
             time.sleep(random.random()/10)
         except Exception as e:
-            print(e) """
+            print(e)
+    
+    north.send("".encode(),type=3)
     print(i)
     
 
