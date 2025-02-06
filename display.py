@@ -160,7 +160,7 @@ def display_crossroads(stdscr):
 
 def simulate(stdscr):
     shm = shared_memory_process.shared_memory_manager('display')
-    time.sleep(1)
+    time.sleep(2)
     curses.curs_set(0)  
     stdscr.nodelay(1)  
 

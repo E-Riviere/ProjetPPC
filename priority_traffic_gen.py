@@ -54,7 +54,7 @@ def gen_prio_traffic():
             message = None
         if message != None:
             north.send("".encode(),type=5)
-            os.kill(os.getgid(),signal.SIGINT)
+            os.kill(os.getpid(),signal.SIGINT)
         os.kill(light_pid, signal.SIGUSR1)
         with open(pipe_path, "w") as pipe:
             print(2**n_source, source)

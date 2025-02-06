@@ -21,7 +21,7 @@ class Coordinator:
         self.existing_shm = shared_memory.SharedMemory(name="trafficLightState")
         signal.signal(signal.SIGUSR1, lambda a, b: sig_usr1_handler(self.light_pid, self.existing_shm))
         signal.signal(signal.SIGINT, sig_int_handler)
-
+        self.pid = os.getpid()
         self.data = [["R","R","R","R"],"","","","","An action"]
         self.voitureN = ""
         self.voitureW = ""
@@ -61,9 +61,15 @@ class Coordinator:
                 self.message = None
         return self.message
 
-    def mainLoop(self,a):
+    def mainLoop(self):
         self.data = [["R","R","R","R"],"","","","",""]
         self.light_changed = False
+        if self.conn == None:
+            try:
+                self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.conn, addr = self.server_socket.accept()
+            except OSError:
+                pass
         while True:
             self.old_light = self.data[0]
             try:
@@ -113,11 +119,7 @@ class Coordinator:
                 if self.light_changed :
                     print(self.old_light, self.data[0])
                 if self.conn == None:
-                    try:
-                        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        self.conn, addr = self.server_socket.accept()
-                    except OSError:
-                        pass
+                    pass
                 else:
                     if (((self.voitureN != None or self.voitureS != None) and self.data[0] ==["V","R","R","V"]) or ((self.voitureW != None or self.voitureE != None) and self.data[0] ==["R","V","V","R"]) or self.light_changed):
                         self.data[5] = "Normal traffic"
@@ -128,17 +130,16 @@ class Coordinator:
                             self.light_changed = False
                         except Exception as e:
                             pass
-
+                    data_recv = None
                     try:
                         data_recv = self.conn.recv(1024, socket.MSG_DONTWAIT)
-                        if data_recv == None:
-                            self.conn.close()
-                            self.conn = None
-                        elif data_recv == b"exit":
-                            self.conn.close()
-                            self.conn = None
                     except:
                         pass
+                    if data_recv == b"exit":
+                        self.conn.close()
+                        print("killing")
+                        os.kill(self.pid, signal.SIGINT)
+                        self.conn = None
                 if (self.voitureN or self.voitureS) and self.data[0] ==["V","R","R","V"] or ((self.voitureW  or self.voitureE) and self.data[0] ==["R","V","V","R"]):
                     time.sleep(random.randint(AVG_TIME_TO_PASS - AVG_TIME_TO_PASS // 5, AVG_TIME_TO_PASS + AVG_TIME_TO_PASS // 5))
                 if self.voitureE is None and self.voitureN is None and self.voitureS is None and self.voitureW is None:
@@ -148,7 +149,7 @@ class Coordinator:
                     except sysv_ipc.BusyError:
                         message = None
                     if message != None:
-                        os.kill(os.getpid(),signal.SIGINT)
+                        os.kill(self.pid,signal.SIGINT)
         
                 
 
@@ -215,13 +216,21 @@ def sig_usr1_handler(pid, shm):
                         pass
                 time.sleep(random.randint(AVG_TIME_TO_PASS - AVG_TIME_TO_PASS // 5, AVG_TIME_TO_PASS + AVG_TIME_TO_PASS // 5))
                 os.kill(coord.light_pid, signal.SIGUSR2)
+    
 
 
 def sig_int_handler(a, b):
     time.sleep(1)
-    
+    print("rneznfior")
     coord.north.send("".encode(),type = 4)
-    message, t = coord.north.receive(type=5)
+    message = None
+    while message == None:
+        try:
+            message, t = coord.north.receive(type=5, block=False)
+            message = message.decode()
+        except sysv_ipc.BusyError:
+            message = None
+    
     coord.existing_shm.close()
     time.sleep(1)
     print("killed mq and gen")
@@ -233,7 +242,7 @@ def sig_int_handler(a, b):
 if __name__ == "__main__":
     coord = Coordinator()
     try:
-        coord.mainLoop(0)
+        coord.mainLoop()
     except Exception as e:
         print(e) 
     
