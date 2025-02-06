@@ -102,12 +102,10 @@ class Coordinator:
                         if self.voitureN and self.voitureS:
                             if self.voitureN.split(",")[0] == "East" and self.voitureS.split(",")[0] != "West":
                                 self.voitureNState = "Waiting"
-                                print("Waiting")
                             else:
                                 self.voitureNState = "Passing"
                             if self.voitureS.split(",")[0] == "West" and self.voitureN.split(",")[0] != "East":
                                 self.voitureSState = "Waiting"
-                                print("Waiting")
                             else:
                                 self.voitureSState = "Passing"
                         else:
@@ -116,8 +114,6 @@ class Coordinator:
                         self.data = [["V","R","R","V"], str(self.voitureN) + " is " + self.voitureNState, "", "", str(self.voitureS) + " is " + self.voitureSState, ""]
                 
                 self.light_changed = self.old_light != self.data[0]
-                if self.light_changed :
-                    print(self.old_light, self.data[0])
                 if self.conn == None:
                     pass
                 else:
@@ -125,7 +121,6 @@ class Coordinator:
                         self.data[5] = "Normal traffic"
                         self.strdata = str(self.data)
                         try:
-                            print("send " , self.strdata,self.old_light )
                             self.conn.send(self.strdata.encode())
                             self.light_changed = False
                         except Exception as e:
@@ -137,7 +132,6 @@ class Coordinator:
                         pass
                     if data_recv == b"exit":
                         self.conn.close()
-                        print("killing")
                         os.kill(self.pid, signal.SIGINT)
                         self.conn = None
                 if (self.voitureN or self.voitureS) and self.data[0] ==["V","R","R","V"] or ((self.voitureW  or self.voitureE) and self.data[0] ==["R","V","V","R"]):
@@ -163,11 +157,9 @@ class Coordinator:
             self.existing_shm.close()
         except:
             pass
-        print("shared memory unlinked")
         self.server_socket.close()
         if self.conn != None:
             self.conn.close()
-        print("Server closed")
         try:
             self.north.remove()
             self.south.remove()
@@ -221,7 +213,6 @@ def sig_usr1_handler(pid, shm):
 
 def sig_int_handler(a, b):
     time.sleep(1)
-    print("rneznfior")
     coord.north.send("".encode(),type = 4)
     message = None
     while message == None:
@@ -233,10 +224,9 @@ def sig_int_handler(a, b):
     
     coord.existing_shm.close()
     time.sleep(1)
-    print("killed mq and gen")
     coord.clearMemory()
     os.kill(coord.light_pid, signal.SIGINT)
-    print("killed light")
+    os.remove("priority_trafic_pipe") 
     raise KeyboardInterrupt()
 
 if __name__ == "__main__":
