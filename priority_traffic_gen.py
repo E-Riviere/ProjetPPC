@@ -24,11 +24,6 @@ def gen_prio_traffic():
     signal.signal(signal.SIGINT, lambda a, b: del_pipe(pipe_path))
     light_pid=int([i for i in data_process if i[0]=='light'][0][1])
     while True:
-        try:
-            message, t = north.receive(type=1, block=False)
-            message = message.decode()
-        except sysv_ipc.BusyError:
-            message = None
         
         time.sleep(random.randint(5, 15))
         direction = ["South", "East", "West", "North"]
@@ -51,7 +46,15 @@ def gen_prio_traffic():
             east.send(message, type=2)
 
         i += 1
-        print(light_pid)
+
+        try:
+            message, t = north.receive(type=4, block=False)
+            message = message.decode()
+        except sysv_ipc.BusyError:
+            message = None
+        if message != None:
+            north.send("".encode(),type=5)
+            os.kill(os.getgid(),signal.SIGINT)
         os.kill(light_pid, signal.SIGUSR1)
         with open(pipe_path, "w") as pipe:
             print(2**n_source, source)

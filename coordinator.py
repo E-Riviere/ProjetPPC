@@ -219,8 +219,10 @@ def sig_int_handler(a, b):
     print("killed")
     coord.north.send("".encode(),type = 3)
     coord.north.send("".encode(),type = 4)
-    print("killed 2")
+    message, t = coord.north.receive(type=5)
     time.sleep(1)
+    print("killed mq and gen")
+
     raise KeyboardInterrupt()
 
 if __name__ == "__main__":
